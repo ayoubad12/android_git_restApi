@@ -3,8 +3,10 @@ package ma.enset.gitapi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +17,7 @@ import java.util.List;
 
 import ma.enset.gitapi.model.GitUser;
 import ma.enset.gitapi.model.GitUsersResponse;
+import ma.enset.gitapi.model.UsersListViewModel;
 import ma.enset.gitapi.service.GitRepoServiceApi;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,26 +30,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        EditText editTextQuery = findViewById(R.id.editTextQuery);
+        //pour permetre l'application d'afficher les images sous forme d'URL
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+
+        //defined the UI elements
+        final EditText editTextQuery = findViewById(R.id.editTextQuery);
         Button buttonSearch = findViewById(R.id.buttonSearch);
         ListView listViewUsers = findViewById(R.id.listViewUsers);
 
-        List<String> data =  new ArrayList<>();
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, data);
-        listViewUsers.setAdapter(arrayAdapter);
+        //setting the adapter
+        List<GitUser> data =  new ArrayList<>();
+//        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, data); //simple_list_item_1 is a predefined layout provided by Android
+        UsersListViewModel listViewModel = new UsersListViewModel(this, R.layout.users_list_view_layout, data);
+        listViewUsers.setAdapter(listViewModel);
 
+        //set up retrofit
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.github.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-
+        //on click listener
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String query = editTextQuery.getText().toString();
                 Log.i("clicked", query);
                 GitRepoServiceApi gitRepoServiceApi = retrofit.create(GitRepoServiceApi.class);
-                Call<GitUsersResponse> callGitUsers = gitRepoServiceApi.searchUsers(query); //what is this datatype ?
+                Call<GitUsersResponse> callGitUsers = gitRepoServiceApi.searchUsers(query);
 
                 callGitUsers.enqueue(new Callback<GitUsersResponse>() {
                     @Override
@@ -58,9 +70,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                         GitUsersResponse gitUsersResponse = response.body();
                         for(GitUser user:gitUsersResponse.users){
-                            data.add(user.login);
+                            data.add(user);
                         }
-                        arrayAdapter.notifyDataSetChanged();
+                        listViewModel.notifyDataSetChanged();
                     }
 
                     @Override
@@ -68,6 +80,14 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("error", "Error");
                     }
                 });
+            }
+        });
+        listViewUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String login = data.get(position).login;
+                Log.i("info", login);
+
             }
         });
     }
