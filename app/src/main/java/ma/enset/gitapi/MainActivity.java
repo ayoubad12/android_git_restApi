@@ -2,6 +2,7 @@ package ma.enset.gitapi;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -26,6 +27,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
+    List<GitUser> data =  new ArrayList<>();
+    public static final String USER_LOGIN_PARAM="user.login";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         //pour permetre l'application d'afficher les images sous forme d'URL
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+        setTitle("Main");
 
 
         //defined the UI elements
@@ -41,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         ListView listViewUsers = findViewById(R.id.listViewUsers);
 
         //setting the adapter
-        List<GitUser> data =  new ArrayList<>();
 //        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, data); //simple_list_item_1 is a predefined layout provided by Android
         UsersListViewModel listViewModel = new UsersListViewModel(this, R.layout.users_list_view_layout, data);
         listViewUsers.setAdapter(listViewModel);
@@ -87,7 +91,10 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String login = data.get(position).login;
                 Log.i("info", login);
-
+                //open new activity(page)
+                Intent intent = new Intent(getApplicationContext(), RepositoryActivity.class);
+                intent.putExtra(USER_LOGIN_PARAM, login);
+                startActivity(intent);
             }
         });
     }
