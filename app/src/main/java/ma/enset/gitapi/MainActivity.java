@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
         setTitle("Main");
 
-
         //defined the UI elements
         final EditText editTextQuery = findViewById(R.id.editTextQuery);
         Button buttonSearch = findViewById(R.id.buttonSearch);
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.i("indo", String.valueOf(response.code()));
                             return ;
                         }
-                        GitUsersResponse gitUsersResponse = response.body();
+                        GitUsersResponse gitUsersResponse = response.body() ;
                         for(GitUser user:gitUsersResponse.users){
                             data.add(user);
                         }

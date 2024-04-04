@@ -71,7 +71,7 @@ public class RepositoryActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<GitRepo>> call, Throwable t) {
-
+                Log.e("error", "Error");
             }
         });
     }
